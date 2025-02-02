@@ -2,79 +2,36 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 )
 
 func handlerChirpsValidate(w http.ResponseWriter, r *http.Request) {
-	type parameters struct {
+	type Parameters struct {
 		Body string `json:"body"`
 	}
 
-	type returnVals struct {
-		Valid bool `json:"valid"`
-	}
-
-	type errorResponse struct {
-		Error string `json:"error"`
+	type ReturnVals struct {
+		CleanedBody string `json:"cleaned_body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
-	params := parameters{}
+	params := Parameters{}
 	err := decoder.Decode(&params)
 	if err != nil {
-		errResp := errorResponse{
-			Error: "Something went wrong",
-		}
-
-		data, err := json.Marshal(errResp)
-		if err != nil {
-			log.Printf("marshalling error JSON: %s", err)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(500)
-		w.Write(data)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
 		return
 	}
 
-	if len(params.Body) > 140 {
-		errResp := errorResponse{
-			Error: "Chirp is too long",
-		}
-
-		data, err := json.Marshal(errResp)
-		if err != nil {
-			log.Printf("marshalling error JSON: %s", err)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(400)
-		w.Write(data)
+	const maxChirpLength = 140
+	if len(params.Body) > maxChirpLength {
+		respondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
 		return
 	}
 
-	respBody := returnVals{Valid: true}
-	data, err := json.Marshal(respBody)
-	if err != nil {
-		errResp := errorResponse{
-			Error: "Something went wrong",
-		}
-
-		data, err := json.Marshal(errResp)
-		if err != nil {
-			log.Printf("marshalling error JSON: %s", err)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(500)
-		w.Write(data)
-		return
+	cleanedText := handlerCleanText(params.Body)
+	response := ReturnVals{
+		CleanedBody: cleanedText,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	log.Printf("vaild:%v", respBody)
-	w.WriteHeader(200)
-	w.Write(data)
-
+	respondWithJSON(w, http.StatusOK, response)
 }

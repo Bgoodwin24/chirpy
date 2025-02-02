@@ -13,3 +13,27 @@ Content-Type: application/json
 {
     "body": "This is a very very very very very very very very very very very very very very very very very very very very very very very very very very very very long chirp"
 }
+
+### Test normal banned words
+POST http://localhost:8080/api/validate_chirp
+Content-Type: application/json
+
+{
+    "body": "This is a kerfuffle and a SHARBERT test"
+}
+
+### Test with punctuation
+POST http://localhost:8080/api/validate_chirp
+Content-Type: application/json
+
+{
+    "body": "This Sharbert! should not be replaced but kerfuffle should"
+}
+
+### Test multiple banned words
+POST http://localhost:8080/api/validate_chirp
+Content-Type: application/json
+
+{
+    "body": "kerfuffle fornax sharbert are all banned"
+}
