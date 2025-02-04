@@ -1,22 +1,44 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
+	"os"
 	"sync/atomic"
+
+	"github.com/Bgoodwin24/chirpy/internal/database"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 // Stores a count of website views
 type apiConfig struct {
 	fileserverHits atomic.Int32
+	db             *database.Queries
 }
 
 func main() {
 	const filepathRoot = "."
 	const port = "8080"
 
+	godotenv.Load()
+	dbURL := os.Getenv("DB_URL")
+	if dbURL == "" {
+		log.Fatal("DB_URL must be set")
+	}
+
+	dbConn, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatalf("Error connecting to database: %s", err)
+	}
+	dbQueries := database.New(dbConn)
+
+	defer dbConn.Close()
+
 	apiCfg := apiConfig{
 		fileserverHits: atomic.Int32{},
+		db:             dbQueries,
 	}
 
 	// Create new server/handlers
