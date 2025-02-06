@@ -2,6 +2,9 @@ package auth
 
 import (
 	"testing"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 func TestCheckPasswordHash(t *testing.T) {
@@ -61,6 +64,82 @@ func TestCheckPasswordHash(t *testing.T) {
 			err := CheckPasswordHash(tt.password, tt.hash)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CheckPasswordHash() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+
+}
+
+func TestCreateValidateJWT(t *testing.T) {
+	secret1 := "secret"
+	secret2 := "wrongSecret"
+	userID := uuid.New()
+	token1, _ := MakeJWT(userID, secret1, time.Hour)
+	token2, _ := MakeJWT(userID, secret2, time.Hour)
+	expiredToken, _ := MakeJWT(userID, secret2, -time.Second)
+
+	tests := []struct {
+		name           string
+		token          string
+		secret         string
+		wantErr        bool
+		expectedUserID uuid.UUID
+	}{
+		{
+			name:           "correct token",
+			token:          token1,
+			secret:         secret1,
+			wantErr:        false,
+			expectedUserID: userID,
+		},
+		{
+			name:           "incorrect token",
+			token:          token2,
+			secret:         secret1,
+			wantErr:        true,
+			expectedUserID: uuid.Nil,
+		},
+		{
+			name:           "incorrect secret",
+			token:          token1,
+			secret:         secret2,
+			wantErr:        true,
+			expectedUserID: uuid.Nil,
+		},
+		{
+			name:           "empty secret",
+			token:          token2,
+			secret:         "",
+			wantErr:        true,
+			expectedUserID: uuid.Nil,
+		},
+		{
+			name:           "expired token",
+			token:          expiredToken,
+			secret:         secret2,
+			wantErr:        true,
+			expectedUserID: uuid.Nil,
+		},
+		{
+			name:           "malformed token",
+			token:          "invalid.token.here",
+			secret:         secret1,
+			wantErr:        true,
+			expectedUserID: uuid.Nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			userID, err := ValidateJWT(tt.token, tt.secret)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ValidateJWT() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if err == nil && userID != tt.expectedUserID {
+				t.Errorf("ValidateJWT() returned wrong userID = %v, expected %v", userID, tt.expectedUserID)
 			}
 		})
 	}
