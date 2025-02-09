@@ -93,6 +93,7 @@ func GetBearerToken(headers http.Header) (string, error) {
 	return parts[1], nil
 }
 
+// Makes a random 256 bit token encoded in hex
 func MakeRefreshToken() (string, error) {
 	token := make([]byte, 32)
 	_, err := rand.Read(token)
@@ -101,4 +102,18 @@ func MakeRefreshToken() (string, error) {
 	}
 
 	return hex.EncodeToString(token), nil
+}
+
+func GetAPIKey(headers http.Header) (string, error) {
+	authHeader := headers.Get("Authorization")
+	if authHeader == "" {
+		return "", ErrNoAuthHeaderIncluded
+	}
+
+	parts := strings.Split(authHeader, " ")
+	if len(parts) < 2 || parts[0] != "ApiKey" {
+		return "", errors.New("malformed authorization header")
+	}
+
+	return parts[1], nil
 }
