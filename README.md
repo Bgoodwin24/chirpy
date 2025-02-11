@@ -226,10 +226,10 @@ goose -dir sql/schema postgres "your-connection-string-here" {up or down}
 ## Request/Response Limits
 * Chirp body: Maximum 140 characters
 * Profanity filter replaces the following words with ****:
+    **⚠️ These are just placeholders as an example ⚠️**
     * "kerfuffle"
     * "sharbert"
     * "fornax"
-    ⚠️ These are just placeholders as an example ⚠️
 
 ## Testing
 1. Run test suite with: `go test ./...`
