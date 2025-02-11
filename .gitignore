@@ -1,4 +1,4 @@
 out
 .env*
-*.pem
-*.key
+database.json
+.test*

@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"net/http"
+	"sort"
 
 	"github.com/google/uuid"
 )
@@ -36,6 +37,17 @@ func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
 			UpdatedAt: dbChirp.UpdatedAt,
 			UserID:    dbChirp.UserID,
 			Body:      dbChirp.Body,
+		})
+	}
+
+	sortString := r.URL.Query().Get("sort")
+	if sortString == "desc" {
+		sort.Slice(chirps, func(i, j int) bool {
+			return chirps[i].CreatedAt.After(chirps[j].CreatedAt)
+		})
+	} else {
+		sort.Slice(chirps, func(i, j int) bool {
+			return chirps[i].CreatedAt.Before(chirps[j].CreatedAt)
 		})
 	}
 
