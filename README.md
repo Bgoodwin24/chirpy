@@ -66,7 +66,7 @@ Chirpy is a social network similar to Twitter(X). Chirpy contains the back-end l
 1. Create a PostgreSQL database
 2. Run the migrations. Syntax:
 ```bash
-goose -dir sql/schema postgres "your-connection-string-here" up
+goose -dir sql/schema postgres "your-connection-string-here" {up or down}
 ```
 3. Verify database connection
 
@@ -83,8 +83,8 @@ goose -dir sql/schema postgres "your-connection-string-here" up
 * golang.org/x/crypto v0.32.0
 
 # Authentication Headers Required
-* JWT Authorization: `Authorization: Bearer \<token\>`
-* Admin API Key: `ApiKey: \<api_key\>`
+* JWT Authorization: `Authorization: Bearer {token}`
+* Admin API Key: `ApiKey: {api_key}`
 
 # Resources
 
@@ -229,7 +229,7 @@ goose -dir sql/schema postgres "your-connection-string-here" up
     * "kerfuffle"
     * "sharbert"
     * "fornax"
-    :warning:These are just placeholders as an example:warning:
+    ⚠️ These are just placeholders as an example ⚠️
 
 ## Testing
 1. Run test suite with: `go test ./...`
